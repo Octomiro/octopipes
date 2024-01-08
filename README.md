@@ -1,4 +1,4 @@
-![octopipes-logo](octopipes-logo.png "Octopipes logo")
+<img src="octopipes-logo.png" width="500"/>
 
 # Octopipes
 *Octopipes* is a pipeline library for AI workflows. Not only it allows
