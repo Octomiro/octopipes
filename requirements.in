@@ -1,0 +1,6 @@
+pydantic
+multiprocess
+opencv-python
+numpy
+cmap
+tqdm
