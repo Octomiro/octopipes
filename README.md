@@ -1,5 +1,10 @@
 <img src="octopipes-logo.png" width="500"/>
 
+
+![github_actions](https://github.com/octomiro/octopipes/actions/workflows/tox.yml/badge.svg)
+
+
+
 # Octopipes
 *Octopipes* is a pipeline library for AI workflows. Not only it allows
 for easy definition of multi-step workflows, but also handles testing
