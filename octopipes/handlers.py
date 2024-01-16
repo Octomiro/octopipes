@@ -1,4 +1,5 @@
 import logging
+import json
 from typing import Any, Protocol
 
 import cmap
@@ -22,10 +23,10 @@ class DefaultHandler:
         return image
 
     def len_output(self, output: Any) -> int | None:
-        return None
+        return len(output)
 
     def to_json(self, output: Any) -> str:
-        return '{}'
+        return json.dumps(output)
 
 
 class SegmentationMasksHandler:
@@ -43,7 +44,7 @@ class SegmentationMasksHandler:
         return overlayed
 
     def to_json(self, output) -> str:
-        raise NotImplementedError
+        return json.dumps(output.tolist())
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -63,7 +64,12 @@ class BboxesHandler:
         return image
 
     def to_json(self, output) -> str:
-        raise NotImplementedError
+        try:
+            # convert to list if object is np array
+            output = output.tolist()
+        except AttributeError:
+            pass
+        return json.dumps(output)
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -91,7 +97,12 @@ class CmapBboxesHandler:
         return image
 
     def to_json(self, output) -> str:
-        raise NotImplementedError
+        try:
+            # convert to list if object is np array
+            output = output.tolist()
+        except AttributeError:
+            pass
+        return json.dumps(output)
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -113,7 +124,12 @@ class CirclesHandler:
         return image
 
     def to_json(self, output) -> str:
-        raise NotImplementedError
+        try:
+            # convert to list if object is np array
+            output = output.tolist()
+        except AttributeError:
+            pass
+        return json.dumps(output)
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
