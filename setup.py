@@ -26,7 +26,8 @@ setup(
         'cmap'
     ],
     extras_require={
-        'opencv': ['opencv-python']
+        'opencv': ['opencv-python'],
+        'pytorch': ['torch', 'torchvision']
     },
     classifiers=[
         'Programming Language :: Python :: 3.11',
