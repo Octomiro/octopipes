@@ -69,7 +69,7 @@ class BboxesHandler:
             output = output.tolist()
         except AttributeError:
             pass
-        return json.dumps(output)
+        return json.dumps({'bboxes': [{'bbox': bbox} for bbox in output] if output is not None else None})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -102,7 +102,7 @@ class CmapBboxesHandler:
             output = output.tolist()
         except AttributeError:
             pass
-        return json.dumps(output)
+        return json.dumps({'bboxes': [{'bbox': bbox, 'val': val} for bbox, val in output] if output is not None else None})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -129,7 +129,7 @@ class CirclesHandler:
             output = output.tolist()
         except AttributeError:
             pass
-        return json.dumps(output)
+        return json.dumps({'circles': output})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
