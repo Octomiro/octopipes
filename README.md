@@ -19,11 +19,11 @@ When using multiple-step (AI) pipelines, **octopipes** helps you define
 workflows and work with workflows in an easy way. It allows for instance, adding post-workflow
 hooks that can clean up GPU memory (or anything else).
 
-Workflows are defined through the `Workflow` class, each worklfow can contain a chain of `processes` (some common ones are already defined).
+Workflows are defined through the `Workflow` class, each workflow can contain a chain of `processes` (some common ones are already defined).
 Every step of the pipeline is saved and can be used later. For easier managements of different outputs, we can provide an output handler for each 
 specific step (Some basic ones are already defined as well such `BboxesHandler` etc.).
 
-To run multiple worklfows on the same input, you can use the `AggregateFlows` class for that. The library also provides a way to read datasets
+To run multiple workflows on the same input, you can use the `AggregateFlows` class for that. The library also provides a way to read datasets
 and run benchmarks 
 
 To keep `octopipes` ML library agnostic, it does not require `pytorch` or `tensorflow` to be installed
@@ -47,7 +47,7 @@ for result in wf_iter:
 # This is especially important, when working with memory intensive GPU workflows
 frozen_res = wf_iter.freeze()
 
-# Get the duration recap of each step of the worklfow
+# Get the duration recap of each step of the workflow
 wf_iter.recap()
 
 # Define a workflow with some metadata attached
@@ -57,11 +57,11 @@ wf = Workflow('wf_name', metadata={'thresh': 0.4}).add(lambda x: x ** 2)
 ```
 
 ### Output handlers
-When adding a new step that outputs a certain results that you want to be processed in a perticular way, you can pass a class that
+When adding a new step that outputs a certain results that you want to be processed in a particular way, you can pass a class that
 implements the `OutputHandler` interface.
 
 The interface has 3 methods:
-* **output_on_image**: used when outputing the results on an image (Used in computer vision mostly)
+* **output_on_image**: used when outputting the results on an image (Used in computer vision mostly)
 * **len_output**: give the output size of the result
 * **to_json**: returns a serialized json object of the result
 
@@ -96,7 +96,7 @@ flows.results[0]
 
 ### Benchmark
 As the name suggest, `Benchmark` allows testing your workflows on a dataset and then being able to calculate easily your metrics.
-Depending on the batch size of the dataset loader, the tests will be run simultaniously (as many processes as the batch size). Take note
+Depending on the batch size of the dataset loader, the tests will be run simultaneously (as many processes as the batch size). Take note
 however that as of now, a single `AggregateFlow` is run synchronously.
 
 If you're using `pytorch` or `tensorflow`, some memory freeing hooks might be needed. For that, you can pass an instance of
@@ -140,9 +140,9 @@ To keep the history of the repo clean, all PRs are rebased instead of merged so 
 
 ## Why Octopipes?
 This library was born from a need to define, benchmark, and debug in an easy way workflows that use foundational models. In the course of
-our work, we did not find something that met that need in terms of flexibility or features. So we created octopipes internaly, and decided
+our work, we did not find something that met that need in terms of flexibility or features. So we created octopipes internally, and decided
 to open source it.
 
-Octopipes is developed and mainted by [octomiro](https://octomiro.ai), an AI company that makes ERP systems intelligent.
+Octopipes is developed and maintained by [octomiro](https://octomiro.ai), an AI company that makes ERP systems intelligent.
 
 
