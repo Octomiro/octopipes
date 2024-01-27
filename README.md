@@ -31,15 +31,26 @@ as it can work with both just fine.
 
 ## Get started
 ### Workflows
+To add steps to a workflow, the class provides the `add` method which takes as input the function (process) and optionally
+an OutputHandler. The whole workflow will act as the `|` (pipe) operator in Unix terminals by successively feeding the output of a process as
+the input of the next process.
+```
+p1 -> p2 -> p3
+```
+
 This shows how to define a simple workflow:
 ```python
 from octopipes.workflow import Workflow
 
-# Define a workflow with a single step
-wf = Workflow('wf_name').add(lambda x: x ** 2)
+# Define a workflow with two steps
+wf = Workflow('wf_name').add(lambda x: x ** 2).add(lambda x: x - 4)
 print(wf.nsteps)
 # output: 1
-wf_iter = wf(1)
+
+# We can now run the workflow on a specific starting input value (in this case 4)
+# `wf` will first run the input on the first function x ** 2, then run the second x - 4 with the result of the previous step.
+# So in the first step of the iteration the result will be 16 (4 ** 2) then 12 (16 - 4)
+wf_iter = wf(4)
 for result in wf_iter:
     pass
 
