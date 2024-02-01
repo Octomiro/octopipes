@@ -1,7 +1,7 @@
-<img src="octopipes-logo.png" width="500"/>
+<img src="https://raw.githubusercontent.com/Octomiro/octopipes/master/octopipes-logo.png" width="500"/>
 
 
-![github_actions](https://github.com/octomiro/octopipes/actions/workflows/tox.yml/badge.svg)
+[![PyPI version](https://badge.fury.io/py/octopipes.svg)](https://badge.fury.io/py/octopipes) ![github_actions](https://github.com/octomiro/octopipes/actions/workflows/tox.yml/badge.svg)
 
 
 
