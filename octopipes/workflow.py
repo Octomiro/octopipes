@@ -26,6 +26,7 @@ class Workflow:
 
         self.processes: list[Callable] = list(processes)  # type: ignore
         self.handlers: list[HandlerInterface] = list(handlers)  # type: ignore
+        self.requires: list[str | None] = []
 
     @property
     def metadata_name(self):
@@ -38,9 +39,18 @@ class Workflow:
     def __len__(self):
         return self.nsteps
 
-    def add(self, process: Callable, handler: HandlerInterface = DefaultHandler()):
+    def add(self, process: Callable, handler: HandlerInterface = DefaultHandler(), requires: str | None = None):
+        """Adds a new process to the workflow.
+
+        Parameters:
+            process: the function/process to be added
+            handler: Additional handler for the output of the process
+            requires: Set additional inputs required other than the strictly previous one.
+                        The requires string should be in this form '0,1,2' where the numbers are the output of the process to inject.
+        """
         self.processes.append(process)
         self.handlers.append(handler)
+        self.requires.append(requires)
         return self
 
     def __call__(self, input: Any, *args: Any, **kwds: Any) -> 'WorkflowIter':
@@ -56,6 +66,7 @@ class Workflow:
         def __iter__(self):
             self.current_step = 0
             self.current_output = self.input
+            self.outputs.append(self.current_output)
             return self
 
         def __next__(self):
@@ -63,7 +74,19 @@ class Workflow:
                 self.current_step += 1
 
                 start = time.perf_counter()
-                self.current_output = self.workflow.processes[self.current_step - 1](self.current_output)
+                if (requires := self.workflow.requires[self.current_step - 1]) is not None:
+                    # get the outputs that need to be injected.
+                    # if the previous step is in the requires string, it should ignored (as it injected automatically).
+                    steps = [int(step) for step in requires.split(',') if int(step) != self.current_step - 1]
+                    injected_outputs = tuple(self.outputs[step] for step in steps)
+
+                    input = (self.current_output,) + injected_outputs
+                    print(input)
+
+                    self.current_output = self.workflow.processes[self.current_step - 1](*input)
+                else:
+                    self.current_output = self.workflow.processes[self.current_step - 1](self.current_output)
+
                 end = time.perf_counter()
                 self.outputs.append(self.current_output)
                 self.durations.append(end - start)

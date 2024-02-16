@@ -67,7 +67,7 @@ wf_iter.recap()
 wf = Workflow('wf_name', metadata={'thresh': 0.4}).add(lambda x: x ** 2)
 ```
 
-### Output handlers
+#### Output handlers
 When adding a new step that outputs a certain results that you want to be processed in a particular way, you can pass a class that
 implements the `OutputHandler` interface.
 
@@ -86,6 +86,25 @@ Handlers are added this way. If None were supplied, `DefaultHandler` is used. *(
 ```python
 wf = Workflow('wf_name').add(some_func, some_handler)
 ```
+
+#### Steps with multiple inputs
+The `add` method that takes an optional `requires` flag in cases a step needs additional inputs from previous steps
+other than the one strictly before it. The flag is a series of comma separated step number like (`0`, `0,1,2`) where 0 is the first input of the workflow and 1 the output of the first step.
+
+To understand this flag, let's suppose that we have such a requirement:
+```
+(input) -> p1 -> p2 -> p3
+```
+Now let's say p3 not only requires the output of `p2` but also the first `input`. In this case when defining your
+workflow you can specify a `requires` flag `requires='0'` that will inject `input` as the second argument to your
+process.
+
+```python
+.add(lambda p2, input: some_calculation(input, p2), requires='0')
+```
+
+Note that the order of the steps in the `requires` flag is retained when injecting the arguments, and the previous
+step of the workflow is ignored in case it is present in `requires` as it is automatically injected by default.
 
 ### AggregateFlows
 `AggregateFlows` allows running **multiple** workflows on the same input. This is usually used when either benchmarking multiple
