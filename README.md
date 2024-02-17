@@ -95,11 +95,12 @@ wf = Workflow('wf_name').add(some_func, some_handler)
 The `add` method can take an optional `requires` flag in cases a step needs additional inputs to work properly. This flag is comma separated string that declares the requires inputs needed for
 a specific process. These requirements are then injected as separate arguments to the step (unpacked). Currently, the `requires` flag supposed two types of injections:
 * Injections from previous steps (or initial input) -- These are declared by their order number (`0`, `1`, etc)
-* Dependencies injections that are independent of the flow of the pipeline. -- These are prefix with the letter `d` (`d0,d2`, etc.)
+* Dependency injections that are independent of the flow of the pipeline. -- These are prefix with the letter `d` (`d0,d2`, etc.)
 
 It is also possible to mix the `requires` with both types such as `0,d1,2` or `d0,1`. And the order in the requires flags is retained when injecting the arguments to the function.
 
 **Previous input injection**
+
 In cases where a workflow step requires inputs from previous steps other than the one strictly before it, we can inject whose inputs using the `requires` flag. 
 The flag is a series of comma separated step numbers like (`0`, `0,1,2`) where 0 is the first input of the workflow and 1 the output of the first step.
 
@@ -119,6 +120,7 @@ Note that the order of the steps in the `requires` flag is retained when injecti
 step of the workflow is ignored in case it is present in `requires` as it is automatically injected by default.
 
 **Dependency injections**
+
 In some cases you might need a workflow to use some data or dependency further down in the workflow without having to propagate that variable through all your steps. This is where you
 can use the `requires` flag of the `add` method to tell octopipes to inject dependencies as arguments to a specific step. The way to specify them is to prefix the dependency number with
 the letter `d`. So `d0,d2` would inject the dependency number 0 and 2 to your step.
