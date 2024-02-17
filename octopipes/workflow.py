@@ -53,14 +53,15 @@ class Workflow:
         self.requires.append(requires)
         return self
 
-    def __call__(self, input: Any, *args: Any, **kwds: Any) -> 'WorkflowIter':
-        return Workflow.WorkflowIter(self, input)
+    def __call__(self, input: Any, dependencies: list | None = None, *args: Any, **kwds: Any) -> 'WorkflowIter':
+        return Workflow.WorkflowIter(self, input, dependencies=dependencies)
 
     class WorkflowIter:
-        def __init__(self, workflow: 'Workflow', input) -> None:
+        def __init__(self, workflow: 'Workflow', input, dependencies: list | None = None) -> None:
             self.workflow = workflow
             self.input = input
             self.outputs = []
+            self.dependencies = list(dependencies) if dependencies else []
             self.durations : list[float] = []
 
         def __iter__(self):
@@ -75,13 +76,8 @@ class Workflow:
 
                 start = time.perf_counter()
                 if (requires := self.workflow.requires[self.current_step - 1]) is not None:
-                    # get the outputs that need to be injected.
-                    # if the previous step is in the requires string, it should ignored (as it injected automatically).
-                    steps = [int(step) for step in requires.split(',') if int(step) != self.current_step - 1]
-                    injected_outputs = tuple(self.outputs[step] for step in steps)
-
-                    input = (self.current_output,) + injected_outputs
-                    print(input)
+                    injected_inputs = self._parse_requires(requires)
+                    input = [self.current_output] + injected_inputs
 
                     self.current_output = self.workflow.processes[self.current_step - 1](*input)
                 else:
@@ -92,6 +88,27 @@ class Workflow:
                 self.durations.append(end - start)
                 return self.current_output
             raise StopIteration
+
+        def _parse_requires(self, requires: str) -> list[Any]:
+            # get the outputs that need to be injected.
+            # if the previous step is in the requires string, it should ignored (as it injected automatically).
+            input = []
+            for step in requires.split(','):
+                if step.startswith('d'):
+                    step = step[1:]
+                    try:
+                        input.append(self.dependencies[int(step)])
+                    except Exception as e:
+                        logger.error(f'encountered an error while parsing requires string {requires!r} due to {e}')
+                else:
+                    try:
+                        output = int(step)
+                        if output != self.current_step - 1:
+                            input.append(self.outputs[output])
+                    except Exception as e:
+                        logger.error(f'encountered an error while parsing requires string {requires!r} due to {e}')
+
+            return input
 
         def recap(self, capture=False):
             output = ''

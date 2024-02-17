@@ -36,3 +36,27 @@ def test_process_requires():
         pass
     
     assert wf_iter.outputs[-1] == 'inputstep1step2inputinputstep1'
+
+def test_process_dependencies():
+    wf = Workflow('test_wf_1')\
+            .add(lambda x: x + 1)\
+            .add(lambda x, y: y, requires='d0')
+
+    wf_iter = wf(1, dependencies=['some_dep'])
+    for _ in wf_iter:
+        pass
+    
+    assert wf_iter.outputs[-1] == 'some_dep'
+
+def test_process_requires_with_dependencies():
+    """Test requires flags when previous outputs and dependencies are injected"""
+    wf = Workflow('test_wf_1')\
+            .add(lambda x: x[0])\
+            .add(lambda x, y, z: x + y + z, requires='0,d0')
+
+    wf_iter = wf('input', dependencies=['some_dep'])
+    for _ in wf_iter:
+        pass
+    
+    assert wf_iter.outputs[-1] == 'i' + 'input' + 'some_dep'
+

@@ -37,6 +37,10 @@ the input of the next process.
 ```
 p1 -> p2 -> p3
 ```
+In math terms, the workflow runs the function composition of all the steps.
+```math
+p3 \circ p2 \circ p1 (x)
+```
 
 This shows how to define a simple workflow:
 ```python
@@ -87,15 +91,23 @@ Handlers are added this way. If None were supplied, `DefaultHandler` is used. *(
 wf = Workflow('wf_name').add(some_func, some_handler)
 ```
 
-#### Steps with multiple inputs
-The `add` method that takes an optional `requires` flag in cases a step needs additional inputs from previous steps
-other than the one strictly before it. The flag is a series of comma separated step number like (`0`, `0,1,2`) where 0 is the first input of the workflow and 1 the output of the first step.
+#### Workflow steps with additional inputs
+The `add` method can take an optional `requires` flag in cases a step needs additional inputs to work properly. This flag is comma separated string that declares the requires inputs needed for
+a specific process. These requirements are then injected as separate arguments to the step (unpacked). Currently, the `requires` flag supposed two types of injections:
+* Injections from previous steps (or initial input) -- These are declared by their order number (`0`, `1`, etc)
+* Dependencies injections that are independent of the flow of the pipeline. -- These are prefix with the letter `d` (`d0,d2`, etc.)
+
+It is also possible to mix the `requires` with both types such as `0,d1,2` or `d0,1`. And the order in the requires flags is retained when injecting the arguments to the function.
+
+**Previous input injection**
+In cases where a workflow step requires inputs from previous steps other than the one strictly before it, we can inject whose inputs using the `requires` flag. 
+The flag is a series of comma separated step numbers like (`0`, `0,1,2`) where 0 is the first input of the workflow and 1 the output of the first step.
 
 To understand this flag, let's suppose that we have such a requirement:
 ```
 (input) -> p1 -> p2 -> p3
 ```
-Now let's say p3 not only requires the output of `p2` but also the first `input`. In this case when defining your
+Now let's say p3 not only requires the output of `p2` but also the first `input` (The initial starting value when running the workflow). In this case when defining your
 workflow you can specify a `requires` flag `requires='0'` that will inject `input` as the second argument to your
 process.
 
@@ -105,6 +117,17 @@ process.
 
 Note that the order of the steps in the `requires` flag is retained when injecting the arguments, and the previous
 step of the workflow is ignored in case it is present in `requires` as it is automatically injected by default.
+
+**Dependency injections**
+In some cases you might need a workflow to use some data or dependency further down in the workflow without having to propagate that variable through all your steps. This is where you
+can use the `requires` flag of the `add` method to tell octopipes to inject dependencies as arguments to a specific step. The way to specify them is to prefix the dependency number with
+the letter `d`. So `d0,d2` would inject the dependency number 0 and 2 to your step.
+
+After declaring where the dependencies should be injected, you simply has to specify them when running the workflow:
+```
+wf = Workflow('name').add(lambda x y: x + y, requires='d0')
+wf_iter = wf(input=get_input(), dependencies=[dependency0, dependency1])
+```
 
 ### AggregateFlows
 `AggregateFlows` allows running **multiple** workflows on the same input. This is usually used when either benchmarking multiple
