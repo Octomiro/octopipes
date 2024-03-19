@@ -86,7 +86,10 @@ class Workflow:
                 end = time.perf_counter()
                 self.outputs.append(self.current_output)
                 self.durations.append(end - start)
-                return self.current_output
+                step_name = self.workflow.processes[self.current_step - 1].__name__
+
+                return step_name, self.current_output
+
             raise StopIteration
 
         def _parse_requires(self, requires: str) -> list[Any]:
