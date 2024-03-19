@@ -33,7 +33,7 @@ as it can work with both just fine.
 ### Workflows
 To add steps to a workflow, the class provides the `add` method which takes as input the function (process) and optionally
 an OutputHandler. The whole workflow will act as the `|` (pipe) operator in Unix terminals by successively feeding the output of a process as
-the input of the next process.
+the input of the next process. To run a workflow, you just need to iterate over it with the appropriate input(s).
 ```
 p1 -> p2 -> p3
 ```
@@ -42,7 +42,7 @@ In math terms, the workflow runs the function composition of all the steps.
 p3 \circ p2 \circ p1 (x)
 ```
 
-This shows how to define a simple workflow:
+This shows how to define and run a simple workflow:
 ```python
 from octopipes.workflow import Workflow
 
@@ -55,7 +55,7 @@ print(wf.nsteps)
 # `wf` will first run the input on the first function x ** 2, then run the second x - 4 with the result of the previous step.
 # So in the first step of the iteration the result will be 16 (4 ** 2) then 12 (16 - 4)
 wf_iter = wf(4)
-for result in wf_iter:
+for step, result in wf_iter:
     pass
 
 # return a frozen instance of the workflow run.
