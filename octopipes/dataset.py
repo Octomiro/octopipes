@@ -54,3 +54,7 @@ class DataloaderIter:
         raise StopIteration
 
 
+@dataclass
+class InputWithDeps:
+    input: Any
+    dependencies: list
