@@ -5,6 +5,7 @@ from collections.abc import Callable
 
 from octopipes.results import Results, Step
 from octopipes.handlers import DefaultHandler, HandlerInterface
+from octopipes import utils
 
 
 logger = logging.getLogger(__name__)
@@ -120,6 +121,30 @@ class Workflow:
             if capture:
                 return output
             print(output)
+
+        
+        def output_on_image(self, image, output=-1, save_to_file=True, path: str | None = None) -> None:
+            import cv2
+
+            handler = self.workflow.handlers[output]
+            step = self.workflow.processes[output].__name__
+            output = self.outputs[output][0]
+            if output is None:
+                return
+
+            img = image.copy()
+            img : Any = handler.output_on_image(img, output)
+
+            if save_to_file:
+                if path is not None:
+                    utils.write_image(img, path)
+                else:
+                    raise ValueError('save_to_file set but path is None')
+
+            else:
+                cv2.imshow(self.workflow.name, img)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
 
         def steps_recap(self) -> tuple[Step, ...]:
             return tuple({'step': process.__name__, 'duration': d} for process, d in zip(self.workflow.processes, self.durations))

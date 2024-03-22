@@ -59,4 +59,3 @@ def test_process_requires_with_dependencies():
         pass
     
     assert wf_iter.outputs[-1] == 'i' + 'input' + 'some_dep'
-
