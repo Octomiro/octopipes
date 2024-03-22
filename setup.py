@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='octopipes',
-    version='0.2.2',
+    version='0.2.3',
     description='Pipeline library for AI workflows.',
     author='Octomiro',
     author_email='contact@octomiro.ai',
