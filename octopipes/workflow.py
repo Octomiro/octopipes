@@ -127,8 +127,7 @@ class Workflow:
             import cv2
 
             handler = self.workflow.handlers[output]
-            step = self.workflow.processes[output].__name__
-            output = self.outputs[output][0]
+            output = self.outputs[output]
             if output is None:
                 return
 

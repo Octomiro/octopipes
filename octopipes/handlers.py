@@ -57,7 +57,7 @@ class BboxesHandler:
 
         if output is None:
             return image
-        color = list(np.random.choice(range(256), size=3))
+        color = np.random.choice(range(256), size=3).tolist()
         for bbox in output:
             cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 3)
 
