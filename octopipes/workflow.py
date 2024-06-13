@@ -145,6 +145,13 @@ class Workflow:
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
 
+        def json_output(self, output: int = -1) -> str:
+            """Returns the json output of a step using the corresponding handler"""
+            handler = self.workflow.handlers[output]
+            output = self.outputs[output]
+
+            return handler.to_json(output)
+
         def steps_recap(self) -> tuple[Step, ...]:
             return tuple({'step': process.__name__, 'duration': d} for process, d in zip(self.workflow.processes, self.durations))
 
