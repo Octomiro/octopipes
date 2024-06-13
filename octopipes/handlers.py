@@ -44,7 +44,7 @@ class SegmentationMasksHandler:
         return overlayed
 
     def to_json(self, output) -> str:
-        return json.dumps(output.tolist())
+        return json.dumps({'segmentation': output.tolist(), 'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -69,7 +69,8 @@ class BboxesHandler:
             output = output.tolist()
         except AttributeError:
             pass
-        return json.dumps({'bboxes': [{'bbox': bbox} for bbox in output] if output is not None else None})
+        return json.dumps({'bboxes': [{'bbox': bbox} for bbox in output] if output is not None else None,
+                           'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -102,7 +103,8 @@ class CmapBboxesHandler:
             output = output.tolist()
         except AttributeError:
             pass
-        return json.dumps({'bboxes': [{'bbox': bbox, 'val': val} for bbox, val in output] if output is not None else None})
+        return json.dumps({'bboxes': [{'bbox': bbox, 'val': val} for bbox, val in output] if output is not None else None,
+                           'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
@@ -129,7 +131,7 @@ class CirclesHandler:
             output = output.tolist()
         except AttributeError:
             pass
-        return json.dumps({'circles': output})
+        return json.dumps({'circles': output, 'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
         return len(output)
