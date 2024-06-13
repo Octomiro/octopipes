@@ -175,4 +175,5 @@ class Workflow:
                            output=self.current_output,
                            len_output=self.len_output(),
                            total_duration=self.total_duration,
-                           output_recap=self.steps_recap())
+                           output_recap=self.steps_recap(),
+                           json_output=self.json_output())

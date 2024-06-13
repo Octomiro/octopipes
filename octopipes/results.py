@@ -21,3 +21,4 @@ class Results(BaseModel):
     len_output: int | None
     total_duration: float
     output_recap: tuple[Step, ...]
+    json_output: str
