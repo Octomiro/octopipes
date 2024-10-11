@@ -68,7 +68,6 @@ class Workflow:
         def __iter__(self):
             self.current_step = 0
             self.current_output = self.input
-            self.outputs.append(self.current_output)
             return self
 
         def __next__(self):
@@ -94,23 +93,32 @@ class Workflow:
             raise StopIteration
 
         def _parse_requires(self, requires: str) -> list[Any]:
-            # get the outputs that need to be injected.
-            # if the previous step is in the requires string, it should ignored (as it injected automatically).
+            # List to hold the inputs that need to be injected
             input = []
+
+            # Iterate through each step in the 'requires' string
             for step in requires.split(','):
-                if step.startswith('d'):
-                    step = step[1:]
+                step = step.strip()  # Strip any extra spaces for clean parsing
+
+                if step == '0':
+                    # Handle case where output is 0, directly append self.input
+                    input.append(self.input)
+                elif step.startswith('d'):
+                    # Handling dependencies
                     try:
-                        input.append(self.dependencies[int(step)])
-                    except Exception as e:
-                        logger.error(f'encountered an error while parsing requires string {requires!r} due to {e}')
+                        dependency_index = int(step[1:])
+                        input.append(self.dependencies[dependency_index])
+                    except (IndexError, ValueError) as e:
+                        logger.error(f"Error parsing dependency {requires!r}: {e}")
                 else:
+                    # Handling non-zero outputs
                     try:
                         output = int(step)
                         if output != self.current_step - 1:
+                            # Only append if it's not the previous step
                             input.append(self.outputs[output])
-                    except Exception as e:
-                        logger.error(f'encountered an error while parsing requires string {requires!r} due to {e}')
+                    except (IndexError, ValueError) as e:
+                        logger.error(f"Error parsing output {requires!r}: {e}")
 
             return input
 
