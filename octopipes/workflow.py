@@ -68,7 +68,6 @@ class Workflow:
         def __iter__(self):
             self.current_step = 0
             self.current_output = self.input
-            # self.outputs.append(self.current_output)
             return self
 
         def __next__(self):
