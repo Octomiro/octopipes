@@ -121,7 +121,7 @@ class CirclesHandler:
             return image
 
         for x, y, r in output:
-            color = list(np.random.choice(range(256), size=3))
+            color = tuple(map(int, np.random.choice(range(256), size=3)))
             cv2.circle(image, (int(x), int(y)), int(r), color, 3)
         return image
 

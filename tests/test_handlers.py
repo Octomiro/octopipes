@@ -40,6 +40,10 @@ def test_CirclesHandler():
     assert handler.to_json([]) == '{"circles": [], "len_output": 0}'
     assert handler.to_json(None) == '{"circles": null, "len_output": 0}'
 
+    img = np.random.rand(100,100,3) * 255
+
+    handler.output_on_image(img, test_list)
+
 
 def test_CmapBboxesHandler():
     handler = CmapBboxesHandler()
