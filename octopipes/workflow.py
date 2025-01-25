@@ -165,8 +165,12 @@ class Workflow:
         def final_output(self):
             return self.outputs[-1]
 
-        def len_output(self):
-            return len(self.current_output) if hasattr(self.current_output, '__len__') else None
+        def len_output(self, output: int = -1) -> int | None:
+            """Returns the length of the output of a step using the corresponding handler"""
+            handler = self.workflow.handlers[output]
+            output = self.outputs[output]
+
+            return handler.len_output(output) if hasattr(output, '__len__') else None
 
         def freeze(self) -> Results:
             return Results(name=self.workflow.name,
