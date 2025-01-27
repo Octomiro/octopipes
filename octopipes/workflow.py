@@ -170,7 +170,7 @@ class Workflow:
             handler = self.workflow.handlers[output]
             output = self.outputs[output]
 
-            return handler.len_output(output) if hasattr(output, '__len__') else None
+            return handler.len_output(output) 
 
         def freeze(self) -> Results:
             return Results(name=self.workflow.name,
