@@ -23,7 +23,9 @@ class DefaultHandler:
         return image
 
     def len_output(self, output: Any) -> int | None:
-        return len(output) if output is not None else 0
+        if output is not None and hasattr(output, '__len__'):
+            return len(output)
+        return 0
 
     def to_json(self, output: Any) -> str:
         return json.dumps(output)
@@ -73,7 +75,9 @@ class BboxesHandler:
                            'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
-        return len(output) if output is not None else 0
+        if output is not None and hasattr(output, '__len__'):
+            return len(output)
+        return 0
 
 
 class CmapBboxesHandler:
@@ -107,7 +111,9 @@ class CmapBboxesHandler:
                            'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
-        return len(output) if output is not None else 0
+        if output is not None and hasattr(output, '__len__'):
+            return len(output)
+        return 0
 
 
 class CirclesHandler:
@@ -134,5 +140,7 @@ class CirclesHandler:
         return json.dumps({'circles': output, 'len_output': self.len_output(output)})
 
     def len_output(self, output: Any) -> int | None:
-        return len(output) if output is not None else 0
+        if output is not None and hasattr(output, '__len__'):
+            return len(output)
+        return 0
 
