@@ -17,6 +17,7 @@ class Benchmark:
 
         self.dataloader = dataloader
         self.workflows = workflows
+        self.mode=mode
         self.results: list[AggregateFlows] = []
 
         self.factory: AggregateFlowsFactory = DefaultAggregateFlowsFactory(hooks=[]) if flows_factory is None else flows_factory
