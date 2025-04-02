@@ -51,13 +51,25 @@ class Benchmark:
 
     def _run_multithreaded(self):
         """Runs workflows using multithreading (threaded execution)."""
-        for batch in tqdm(self.dataloader,desc= "processing batches"):
+        for batch_idx, batch in enumerate(tqdm(self.dataloader, desc="processing batches")):
             with ThreadPoolExecutor(max_workers=len(batch)) as executor:
-                future_to_sample= {executor.submit(self.run_sample,self.factory, self.workflows, sample): sample for sample in batch}   
-                for future in as_completed(future_to_sample):
+                future_to_index = {
+                    executor.submit(self.run_sample, self.factory, self.workflows, sample): (batch_idx, i)
+                    for i, sample in enumerate(batch)
+                }
+                
+                results_dict = {}  # Store results by batch index
+                
+                for future in as_completed(future_to_index):
                     try:
-                        result=future.result()
-                        self.results.append(result)
+                        batch_idx, i = future_to_index[future]
+                        result = future.result()
+                        results_dict[(batch_idx, i)] = result
                     except Exception as e:
-                        print(f"Error processing sample: {e}")    
+                        print(f"Error processing sample: {e}")
+
+                # Append results in correct order
+                for key in sorted(results_dict.keys()):
+                    self.results.append(results_dict[key])
+    
 
