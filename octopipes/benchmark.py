@@ -8,8 +8,13 @@ from octopipes.aggregate_flows import AggregateFlows, AggregateFlowsFactory, Def
 
 
 class Benchmark:
-    def __init__(self, dataloader: Dataloader, workflows: list[Workflow],
-                 flows_factory: AggregateFlowsFactory | None = None, mode: str = "threaded") -> None:
+    def __init__(
+        self,
+        dataloader: Dataloader,
+        workflows: list[Workflow],
+        flows_factory: AggregateFlowsFactory | None = None,
+        mode: str | None = None,
+    ) -> None:
 
         """
         :param str mode: "single" for sequential execution, "threaded" for multithreading.
@@ -21,7 +26,11 @@ class Benchmark:
         self.results: list[AggregateFlows] = []
 
         self.factory: AggregateFlowsFactory = DefaultAggregateFlowsFactory(hooks=[]) if flows_factory is None else flows_factory
-
+        if mode is None:
+            self.mode = "single" if dataloader.batch_size <= 1 else "threaded"
+        else:
+            self.mode = mode
+            
     @staticmethod
     def run_sample(factory: AggregateFlowsFactory, workflows, sample):
         try:
@@ -32,6 +41,26 @@ class Benchmark:
         aggregate = factory.get_aggregate_flows(feature, workflows)
         aggregate.run_workflows()
         return aggregate
+    
+    def _run_sample_threaded_workflows(self, sample):
+        try:
+            feature, _ = sample
+        except TypeError:
+            feature = sample
+
+        aggregate = self.factory.get_aggregate_flows(feature, self.workflows)
+        
+        # Run each workflow in parallel
+        with ThreadPoolExecutor() as wf_executor:
+            wf_futures = [wf_executor.submit(aggregate._run, wf) for wf in aggregate.workflows]
+            for f in wf_futures:
+                try:
+                    f.result()
+                except Exception as e:
+                    print(f"Workflow failed: {e}")
+        
+        return aggregate
+
 
     def run_tests(self):
         if self.mode == "single":
@@ -54,7 +83,7 @@ class Benchmark:
         for batch_idx, batch in enumerate(tqdm(self.dataloader, desc="processing batches")):
             with ThreadPoolExecutor(max_workers=len(batch)) as executor:
                 future_to_index = {
-                    executor.submit(self.run_sample, self.factory, self.workflows, sample): (batch_idx, i)
+                    executor.submit(self._run_sample_threaded_workflows, sample): (batch_idx, i)
                     for i, sample in enumerate(batch)
                 }
                 
