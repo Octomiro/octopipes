@@ -55,3 +55,24 @@ def test_benchmark_with_dependencies(mode):
     assert benchmark.results[0].results[1].output == 0
     assert benchmark.results[1].results[0].output == 3
     assert benchmark.results[1].results[1].output == -1
+
+def test_benchmark_auto_mode_selection():
+    wf = Workflow('test_wf')\
+            .add(lambda x: x + 1)
+    
+    dataset = MockDataset([1, 2])
+    
+    # Case 1: batch_size = 1 → auto selects "single"
+    dataloader = Dataloader(dataset=dataset, batch_size=1)
+    benchmark = Benchmark(dataloader=dataloader, workflows=[wf])
+    assert benchmark.mode == "single"
+    benchmark.run_tests()
+    assert len(benchmark.results) == 2
+    assert benchmark.results[0].results[0].output == 2
+
+    # Case 2: batch_size = 2 → auto selects "threaded"
+    dataloader = Dataloader(dataset=dataset, batch_size=2)
+    benchmark = Benchmark(dataloader=dataloader, workflows=[wf])
+    assert benchmark.mode == "threaded"
+    benchmark.run_tests()
+    assert len(benchmark.results) == 2
