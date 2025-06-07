@@ -16,6 +16,7 @@ class Benchmark:
         dataloader: Dataloader,
         workflows: list[Workflow],
         flows_factory: AggregateFlowsFactory | None = None,
+        mode: BenchmarkMode | None = None
     ) -> None:
 
         """
@@ -27,7 +28,10 @@ class Benchmark:
         self.results: list[AggregateFlows] = []
 
         self.factory: AggregateFlowsFactory = DefaultAggregateFlowsFactory(hooks=[]) if flows_factory is None else flows_factory
-        self.mode = BenchmarkMode.SINGLE if dataloader.batch_size <= 1 else BenchmarkMode.THREADED
+        if mode is None:
+            self.mode = BenchmarkMode.SINGLE if dataloader.batch_size <= 1 else BenchmarkMode.THREADED
+        else:
+            self.mode = mode
             
     @staticmethod
     def run_sample(factory: AggregateFlowsFactory, workflows, sample):
@@ -61,9 +65,9 @@ class Benchmark:
 
 
     def run_tests(self):
-        if self.mode == "single":
+        if self.mode == BenchmarkMode.SINGLE:
             self._run_sequential()
-        elif self.mode == "threaded":
+        elif self.mode == BenchmarkMode.THREADED:
             self._run_multithreaded()
         else:
             raise ValueError(f"Invalid model: {self.mode}. Choose 'single' or 'threaded' ")       
