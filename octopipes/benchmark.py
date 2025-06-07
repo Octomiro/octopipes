@@ -1,11 +1,14 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from tqdm import tqdm
-
+from enum import Enum
 from octopipes.dataset import Dataloader
 from octopipes.workflow import Workflow
 from octopipes.aggregate_flows import AggregateFlows, AggregateFlowsFactory, DefaultAggregateFlowsFactory
 
+class BenchmarkMode(Enum):
+    SINGLE="single"
+    THREADED="threaded"
 
 class Benchmark:
     def __init__(
@@ -13,7 +16,6 @@ class Benchmark:
         dataloader: Dataloader,
         workflows: list[Workflow],
         flows_factory: AggregateFlowsFactory | None = None,
-        mode: str | None = None,
     ) -> None:
 
         """
@@ -22,14 +24,10 @@ class Benchmark:
 
         self.dataloader = dataloader
         self.workflows = workflows
-        self.mode=mode
         self.results: list[AggregateFlows] = []
 
         self.factory: AggregateFlowsFactory = DefaultAggregateFlowsFactory(hooks=[]) if flows_factory is None else flows_factory
-        if mode is None:
-            self.mode = "single" if dataloader.batch_size <= 1 else "threaded"
-        else:
-            self.mode = mode
+        self.mode = BenchmarkMode.SINGLE if dataloader.batch_size <= 1 else BenchmarkMode.THREADED
             
     @staticmethod
     def run_sample(factory: AggregateFlowsFactory, workflows, sample):
