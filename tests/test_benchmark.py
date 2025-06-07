@@ -14,7 +14,7 @@ def test_benchmark(mode):
     benchmark = Benchmark(dataloader=dataloader, workflows=[wf1, wf2],mode=mode)
     benchmark.run_tests()
 
-    sorted_result = sorted(benchmark.results, key=lambda r: sorted(r.results, key=lambda x: x.workflow.name)[0].output)
+    sorted_result= sorted(benchmark.results, key=lambda r: r.results[0].output)
     assert len(benchmark.results) == 4
     assert sorted_result[0].results[0].output == 2
     assert sorted_result[0].results[1].output == 2
