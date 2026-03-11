@@ -19,10 +19,10 @@ class HandlerInterface(Protocol):
         ...
 
 @dataclass
-class DefaultHandler:
+class DefaultHandler():
     output: Any
 
-    def viz(self, _ : str = 'default') -> list[np.ndarray]:
+    def viz(self, param : str = 'default') -> list[np.ndarray]:
         return []
 
     def size(self) -> int | None:

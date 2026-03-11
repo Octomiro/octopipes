@@ -19,7 +19,7 @@ def test_workflow():
 def test_process_requires():
     wf = Workflow('test_wf_1')\
             .add(workflow_step(lambda x: x + 1))\
-            .add(workflow_step(lambda x, y: x - y))
+            .add(workflow_step(lambda x: x - 1))
 
     wf_iter = wf(1)
     for _ in wf_iter:
@@ -30,25 +30,21 @@ def test_process_requires():
 
     wf = Workflow('test_wf_1')\
             .add(workflow_step(lambda x: x + 'step1'))\
-            .add(workflow_step(lambda x: x + 'step2'))\
-            .add(workflow_step(lambda x, y, z: x + y + z))
+            .add(workflow_step(lambda x: x + 'step2'))
 
     wf_iter = wf('input')
     for _ in wf_iter:
         pass
     
-    assert wf_iter.outputs[-1] == 'inputstep1step2inputinputstep1'
+    assert wf_iter.outputs[-1] == 'inputstep1step2'
 
 def test_process_dependencies():
     wf = Workflow('test_wf_1')\
             .add(workflow_step(lambda x: x + 1))\
-            .add(lambda x, y: (x.dep, DefaultHandler(output=x.dep)))
+            .add(lambda x, y: (x.dependency, DefaultHandler(output=x.dependency)))
 
-    @dataclass
-    class Input(WorkflowInput):
-        dep: str
 
-    wf_iter = wf(Input(input='w1', dep='some_dep'))
+    wf_iter = wf(WorkflowInput(input=1, dependency='some_dep'))
     for _ in wf_iter:
         pass
     

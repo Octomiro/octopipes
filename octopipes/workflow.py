@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class WorkflowInput:
     input: Any
+    dependency: Any = None
 
 class WorkflowStep(Protocol):
     def __call__(self, wi: WorkflowInput, /, *args: Any, **kwargs: Any) -> Tuple[Any, HandlerInterface]:
@@ -23,6 +24,12 @@ def workflow_step(fn: Callable) -> WorkflowStep:
     def inner(_: WorkflowInput, *args, **kwargs):
         output : Any = fn(*args, **kwargs)
         return (output, DefaultHandler(output=output))
+    return inner
+
+def wrap_default_handler(fn: Callable):
+    def inner(*args, **kwargs):
+        out = fn(*args, **kwargs)
+        return (out, DefaultHandler(output=out))
     return inner
 
 class Workflow:
