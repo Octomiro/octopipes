@@ -1,10 +1,12 @@
-from octopipes.workflow import Workflow
+from dataclasses import dataclass
+from octopipes.handlers import DefaultHandler
+from octopipes.workflow import Workflow, WorkflowInput, workflow_step, wrap_default_handler
 
 
 def test_workflow():
     wf = Workflow('test_wf_1')\
-            .add(lambda x: x)\
-            .add(lambda x: x)
+            .add(workflow_step(lambda x: x))\
+            .add(workflow_step(lambda x: x))
     assert wf.nsteps == 2
     wf_iter = wf(1)
     for _, result in wf_iter:
@@ -16,8 +18,8 @@ def test_workflow():
 
 def test_process_requires():
     wf = Workflow('test_wf_1')\
-            .add(lambda x: x + 1)\
-            .add(lambda x, y: x - y, requires='0')
+            .add(workflow_step(lambda x: x + 1))\
+            .add(workflow_step(lambda x: x - 1))
 
     wf_iter = wf(1)
     for _ in wf_iter:
@@ -27,22 +29,22 @@ def test_process_requires():
         
 
     wf = Workflow('test_wf_1')\
-            .add(lambda x: x + 'step1')\
-            .add(lambda x: x + 'step2')\
-            .add(lambda x, y, z: x + y + z, requires='0,1')
+            .add(workflow_step(lambda x: x + 'step1'))\
+            .add(workflow_step(lambda x: x + 'step2'))
 
     wf_iter = wf('input')
     for _ in wf_iter:
         pass
     
-    assert wf_iter.outputs[-1] == 'inputstep1step2inputinputstep1'
+    assert wf_iter.outputs[-1] == 'inputstep1step2'
 
 def test_process_dependencies():
     wf = Workflow('test_wf_1')\
-            .add(lambda x: x + 1)\
-            .add(lambda x, y: y, requires='d0')
+            .add(workflow_step(lambda x: x + 1))\
+            .add(lambda x, y: (x.dependency, DefaultHandler(output=x.dependency)))
 
-    wf_iter = wf(1, dependencies=['some_dep'])
+
+    wf_iter = wf(WorkflowInput(input=1, dependency='some_dep'))
     for _ in wf_iter:
         pass
     
@@ -51,10 +53,10 @@ def test_process_dependencies():
 def test_process_requires_with_dependencies():
     """Test requires flags when previous outputs and dependencies are injected"""
     wf = Workflow('test_wf_1')\
-            .add(lambda x: x[0])\
-            .add(lambda x, y, z: x + y + z, requires='0,d0')
+            .add(workflow_step(lambda x: x[0]))\
+            .add(wrap_default_handler(lambda x, y: y + x.input + x.dependency))
 
-    wf_iter = wf('input', dependencies=['some_dep'])
+    wf_iter = wf(WorkflowInput(input='input', dependency='some_dep'))
     for _ in wf_iter:
         pass
     

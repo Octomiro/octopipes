@@ -1,14 +1,14 @@
 from octopipes.benchmark import Benchmark, BenchmarkMode
-from octopipes.dataset import Dataloader, Dataset, InputWithDeps
-from octopipes.workflow import Workflow
+from octopipes.dataset import Dataloader, Dataset
+from octopipes.workflow import Workflow, WorkflowInput, workflow_step, wrap_default_handler
 import pytest
 
 from tests.test_dataset import MockDataset
 
 @pytest.mark.parametrize("mode", [BenchmarkMode.SINGLE, BenchmarkMode.THREADED])
 def test_benchmark(mode):
-    wf1 = Workflow('test_wf_1').add(lambda x: x + 1)
-    wf2 = Workflow('test_wf_2').add(lambda x: x * 2)
+    wf1 = Workflow('test_wf_1').add(workflow_step(lambda x: x + 1))
+    wf2 = Workflow('test_wf_2').add(workflow_step(lambda x: x * 2))
     dataset: Dataset = MockDataset([1, 2, 3, 4, 5])
     dataloader = Dataloader(dataset=dataset, batch_size=2, drop_last_batch=True)
     benchmark = Benchmark(dataloader=dataloader, workflows=[wf1, wf2],mode=mode)
@@ -23,12 +23,14 @@ def test_benchmark(mode):
 
 @pytest.mark.parametrize("mode", [BenchmarkMode.SINGLE, BenchmarkMode.THREADED])
 def test_benchmark_with_dependencies(mode):
-    wf1 = Workflow('test_wf_1').add(lambda x, y: x + y, requires='d0')
+    wf1 = Workflow('test_wf_1').add(wrap_default_handler(lambda x, y: y + x.dependency))
 
-    wf2 = Workflow('test_wf_2').add(lambda x, y: x - y, requires='d0')
+    wf2 = Workflow('test_wf_2').add(wrap_default_handler(lambda x, y: y - x.dependency))
 
     # This dataset defines inputs with dependencies without ground truth
-    dataset = MockDataset([InputWithDeps(2, dependencies=[2]), InputWithDeps(1, dependencies=[2])])
+    dataset = MockDataset([
+        WorkflowInput(2, 2),
+        WorkflowInput(1, 2)])
     dataloader = Dataloader(dataset=dataset, batch_size=2, drop_last_batch=True)
     benchmark = Benchmark(dataloader=dataloader, workflows=[wf1, wf2],mode=mode)
     benchmark.run_tests()
@@ -40,8 +42,8 @@ def test_benchmark_with_dependencies(mode):
 
     # this dataset defines inputs with dependencies with a ground truth value
     dataset = MockDataset([
-        (InputWithDeps(2, dependencies=[2]), 24),
-        (InputWithDeps(1, dependencies=[2]), 24)
+        (WorkflowInput(2, 2), 24),
+        (WorkflowInput(1, 2), 24)
     ])
     dataloader = Dataloader(dataset=dataset, batch_size=2, drop_last_batch=True)
     benchmark = Benchmark(dataloader=dataloader, workflows=[wf1, wf2], mode=mode)
@@ -54,7 +56,7 @@ def test_benchmark_with_dependencies(mode):
 
 def test_benchmark_auto_mode_selection():
     wf = Workflow('test_wf')\
-            .add(lambda x: x + 1)
+            .add(workflow_step(lambda x: x + 1))
     
     dataset = MockDataset([1, 2])
     
