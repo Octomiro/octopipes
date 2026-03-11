@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from octopipes.computer_vision.annotations import Circle
-from octopipes.computer_vision.vis_utils import viz_opencv_circles
+from octopipes.computer_vision.viz_utils import viz_opencv_circles
 
 
 @dataclass

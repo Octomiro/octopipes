@@ -4,7 +4,7 @@ from typing import Tuple
 
 import numpy as np
 
-from octopipes.computer_vision.vis_utils import viz_opencv_bboxes, viz_opencv_cm_bboxes, viz_opencv_points
+from octopipes.computer_vision.viz_utils import viz_opencv_bboxes, viz_opencv_cm_bboxes, viz_opencv_points
 from octopipes.handlers import DefaultHandler
 from .annotations import Point, Bbox
 
@@ -19,7 +19,7 @@ class ImageHandler(DefaultHandler):
     points: list[Point]
     images: list[np.ndarray]
 
-    def viz(self, _: str = 'default') -> list[np.ndarray]:
+    def viz(self, param: str = 'default') -> list[np.ndarray]:
         image = self.input_image.copy()
 
         if len(self.bboxes) > 0:
@@ -55,7 +55,7 @@ class ImageHandler(DefaultHandler):
 class ImagesHandler:
     images: list[ImageHandler]
 
-    def viz(self, _: str = 'default') -> list[np.ndarray]:
+    def viz(self, param: str = 'default') -> list[np.ndarray]:
         images: list[np.ndarray] = []
 
         for h in self.images:
@@ -64,7 +64,7 @@ class ImagesHandler:
         return images
 
     def size(self) -> int | None:
-        return max(h.size() for h in self.images if h.size())
+        return max(h.size() for h in self.images if h.size() is not None)
 
     def to_json(self) -> str:
         return json.dumps(self.images)

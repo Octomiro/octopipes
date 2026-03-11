@@ -4,7 +4,7 @@ from typing import Tuple
 
 import numpy as np
 
-from octopipes.computer_vision.vis_utils import viz_opencv_bboxes, viz_opencv_cm_bboxes
+from octopipes.computer_vision.viz_utils import viz_opencv_bboxes, viz_opencv_cm_bboxes
 from .annotations import Bbox
 
 
