@@ -54,3 +54,44 @@ def viz_opencv_circles(image: np.ndarray, circles: list[Circle]) -> np.ndarray:
 
     return image
 
+def viz_opencv_sam_segmentation(image: np.ndarray, segmentation) -> np.ndarray:
+    import cv2
+
+    sorted_anns = sorted(segmentation, key=(lambda x: x['area']), reverse=True)
+    w, h = sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1]
+    overlay_mask = np.zeros((w, h, 3), dtype=np.uint8)
+
+    for ann in sorted_anns:
+        mask = ann['segmentation']
+        overlay_mask[mask] = np.random.randint(256, size=3, dtype=np.uint8)
+
+    overlayed = cv2.addWeighted(image, 1, overlay_mask, 0.3, 20)
+
+    return overlayed 
+
+def viz_opencv_sam_predictor_segmentation(image: np.ndarray, segmentation) -> np.ndarray:
+    import cv2
+
+    # Get the masks from segmentation model
+    masks, scores, _ = segmentation
+
+    height = masks.shape[1]
+    width = masks.shape[2]
+
+    overlay_masks = []
+    text_position = (0, 100)
+    for idx in range(masks.shape[0]):
+        overlay_mask = np.zeros((height, width, 3), dtype=np.uint8)
+        m = masks[idx]
+        overlay_mask[m] = np.random.randint(256, size=3, dtype=np.uint8)
+        overlay_masks.append(overlay_mask)
+
+    images = []
+    for idx, overlay_mask in enumerate(overlay_masks):
+        overlayed = cv2.addWeighted(image, 1, overlay_mask, 0.7, 20)
+        cv2.putText(overlayed, f'Score: {scores[idx]:.3f}',
+                    text_position, cv2.FONT_HERSHEY_SIMPLEX,
+                    1, (0, 0, 0), 2, cv2.LINE_AA)
+        images.append(overlayed)
+
+    return np.concatenate(images, axis=0)
