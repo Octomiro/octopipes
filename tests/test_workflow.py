@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from octopipes.handlers import DefaultHandler
-from octopipes.workflow import Workflow, WorkflowInput, workflow_step
+from octopipes.workflow import Workflow, WorkflowInput, workflow_step, wrap_default_handler
 
 
 def test_workflow():
@@ -54,13 +54,9 @@ def test_process_requires_with_dependencies():
     """Test requires flags when previous outputs and dependencies are injected"""
     wf = Workflow('test_wf_1')\
             .add(workflow_step(lambda x: x[0]))\
-            .add(lambda x, y: (y + x.input + x.dep, DefaultHandler(output=y + x.input + x.dep)))
+            .add(wrap_default_handler(lambda x, y: y + x.input + x.dependency))
 
-    @dataclass
-    class Input(WorkflowInput):
-        dep: str
-
-    wf_iter = wf(Input(input='input', dep='some_dep'))
+    wf_iter = wf(WorkflowInput(input='input', dependency='some_dep'))
     for _ in wf_iter:
         pass
     
