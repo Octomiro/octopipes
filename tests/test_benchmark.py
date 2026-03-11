@@ -1,5 +1,5 @@
 from octopipes.benchmark import Benchmark, BenchmarkMode
-from octopipes.dataset import Dataloader, Dataset, InputWithDeps
+from octopipes.dataset import Dataloader, Dataset
 from octopipes.workflow import Workflow, WorkflowInput, workflow_step, wrap_default_handler
 import pytest
 
@@ -48,7 +48,6 @@ def test_benchmark_with_dependencies(mode):
     dataloader = Dataloader(dataset=dataset, batch_size=2, drop_last_batch=True)
     benchmark = Benchmark(dataloader=dataloader, workflows=[wf1, wf2], mode=mode)
     benchmark.run_tests()
-    print(benchmark.results)
     assert len(benchmark.results) == 2
     assert benchmark.results[0].results[0].output == 4
     assert benchmark.results[0].results[1].output == 0
